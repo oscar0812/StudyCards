@@ -10,7 +10,8 @@ cards.add(...);// and so on
 
 
 PDFBuilder pdfBuilder = new PDFBuilder(cards);
-pdfBuilder.maxCardRows(3).centerText(true).setFontSize(14).create();
+pdfBuilder.maxCardRows(3).centerText(true).setFontSize(14).
+                setOutputDir("/Users/oscartorres/Desktop/studyCards").create();
 ```
 
 Example result PDF found [here](https://github.com/oscar0812/StudyCards/blob/master/result.pdf).

@@ -17,7 +17,8 @@ public class PDFBuilder {
     private List<Card> cards;
     private int maxCardRows;
     private boolean centerText = false;
-    double fontSize = 12;
+    private double fontSize = 12;
+    private String outputDir = System.getProperty("user.home");
 
     public PDFBuilder(List<Card> cards) {
         if (cards.size() % 2 != 0)
@@ -45,6 +46,11 @@ public class PDFBuilder {
         return this;
     }
 
+    public PDFBuilder setOutputDir(String outputDir){
+        this.outputDir = outputDir;
+        return this;
+    }
+
     public void create() {
         List<HtmlBuilder> pages = mesh(getPage('q'), getPage('c'));
 
@@ -55,11 +61,11 @@ public class PDFBuilder {
         List<File> files = new ArrayList<>();
         for (int x = 0; x < pages.size(); x++) {
             files.add(writeXHtmlToPDF(
-                    new File("/Users/oscartorres/Desktop/studyCards"),
+                    new File(outputDir),
                     pages.get(x).getXHtml(), x));
         }
 
-        mergePdfFiles(files, "/Users/oscartorres/Desktop/studyCards/result.pdf");
+        mergePdfFiles(files, outputDir+File.separator+"result.pdf");
     }
 
     // get questions or answers

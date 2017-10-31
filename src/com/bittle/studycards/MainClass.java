@@ -35,8 +35,9 @@ public class MainClass {
                         "of citizens affected by a particular set of policies and the bureaucratic\n" +
                         "agency and congressional committee with jurisdiction over those policies."));
 
-        // this is how u make the pdf
+        // this is how you make the pdf
         PDFBuilder pdfBuilder = new PDFBuilder(cards);
-        pdfBuilder.maxCardRows(3).centerText(true).setFontSize(14).create();
+        pdfBuilder.maxCardRows(3).centerText(true).setFontSize(14).
+                setOutputDir("/Users/oscartorres/Desktop/studyCards").create();
     }
 }
