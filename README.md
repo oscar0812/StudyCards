@@ -13,7 +13,7 @@ PDFBuilder pdfBuilder = new PDFBuilder(cards);
 pdfBuilder.maxCardRows(3).centerText(true).setFontSize(14).create();
 ```
 
-Example output PDF found [here]("result.pdf").
+Example output PDF found [here]("/result.pdf").
 
 ##Features
   - Written using iText
