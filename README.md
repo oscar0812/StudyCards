@@ -1,4 +1,4 @@
-#Study Cards
+# Study Cards
 
 Example usage:
 ```java
@@ -17,7 +17,7 @@ Example result PDF found [here](https://github.com/oscar0812/StudyCards/blob/mas
 
 The result PDF is meant to be printed out using both sides of paper, therefore, the questions are displayed in all odd pages (pages 1 , 3, 5...), and answers on the even pages (pages 2, 4, 6...)
 
-##Features
+### Features
   - Written using iText
   - Customization (font size, row count, etc)
   - Fast!
