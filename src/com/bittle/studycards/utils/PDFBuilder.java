@@ -36,23 +36,23 @@ public class PDFBuilder {
         return this;
     }
 
-    public PDFBuilder centerText(boolean bool){
+    public PDFBuilder centerText(boolean bool) {
         centerText = bool;
         return this;
     }
 
-    public PDFBuilder setFontSize(double size){
+    public PDFBuilder setFontSize(double size) {
         fontSize = size;
         return this;
     }
 
-    public PDFBuilder setOutputDir(String outputDir){
+    public PDFBuilder setOutputDir(String outputDir) {
         this.outputDir = outputDir;
         return this;
     }
 
     public void create() {
-        List<HtmlBuilder> pages = mesh(getPage('q'), getPage('c'));
+        List<HtmlBuilder> pages = getPages();
 
         if (!pages.isEmpty() && !pages.get(pages.size() - 1).isClosed()) {
             pages.get(pages.size() - 1).close();
@@ -65,55 +65,36 @@ public class PDFBuilder {
                     pages.get(x).getXHtml(), x));
         }
 
-        mergePdfFiles(files, outputDir+File.separator+"result.pdf");
+        mergePdfFiles(files, outputDir + File.separator + "result.pdf");
     }
 
-    // get questions or answers
-    private List<HtmlBuilder> getPage(char desc) {
+    // get questions and answers
+    private List<HtmlBuilder> getPages() {
         List<HtmlBuilder> pages = new ArrayList<>();
         double height = (HtmlBuilder.MAX_PDF_HEIGHT_PX / maxCardRows);
+
+        // add by pairs, one page for questions, one for answers
         pages.add(new HtmlBuilder(height, centerText, fontSize));
+        pages.add(new HtmlBuilder(height, centerText, fontSize));
+
         int current = 0;
         for (int x = 0; x < cards.size(); x++) {
+            // two cards per row, so * 2
             if (x > 0 && x % (maxCardRows * 2) == 0) {
                 pages.get(current).close();
-                current++;
+                pages.get(current + 1).close();
+                current = current + 2;
+
+                // add by pairs, one page for questions, one for answers
+                pages.add(new HtmlBuilder(height, centerText, fontSize));
                 pages.add(new HtmlBuilder(height, centerText, fontSize));
             }
-            if (desc == 'q')
-                pages.get(current).append(cards.get(x).getQuestion());
-            else
-                pages.get(current).append(cards.get(x).getAnswer());
+            pages.get(current).append(cards.get(x).getQuestion());
+            // append reverse on the answers page since paper is flipped when printed
+            pages.get(current + 1).appendReverse(cards.get(x).getAnswer());
         }
 
         return pages;
-    }
-
-    // combine both lists
-    private List<HtmlBuilder> mesh(List<HtmlBuilder> a, List<HtmlBuilder> b) {
-        List<HtmlBuilder> parent = new ArrayList<>();
-        int swap = 0;
-        while (!a.isEmpty()) {
-            if (swap == 0) {
-                HtmlBuilder temp = a.get(0);
-                a.remove(0);
-                parent.add(temp);
-                swap++;
-            } else {
-                HtmlBuilder temp = b.get(0);
-                b.remove(0);
-                parent.add(temp);
-                swap = 0;
-            }
-        }
-
-        while (!b.isEmpty()) {
-            HtmlBuilder temp = b.get(0);
-            b.remove(0);
-            parent.add(temp);
-        }
-
-        return parent;
     }
 
     private File writeXHtmlToPDF(File outputFileFolder, String xhtmlContent, int current) {
