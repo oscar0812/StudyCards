@@ -89,9 +89,9 @@ public class PDFBuilder {
                 pages.add(new HtmlBuilder(height, centerText, fontSize));
                 pages.add(new HtmlBuilder(height, centerText, fontSize));
             }
-            pages.get(current).append(cards.get(x).getQuestion());
+            pages.get(current).appendLeftToRight(cards.get(x).getQuestion());
             // append reverse on the answers page since paper is flipped when printed
-            pages.get(current + 1).appendReverse(cards.get(x).getAnswer());
+            pages.get(current + 1).appendRightToLeft(cards.get(x).getAnswer());
         }
 
         return pages;
