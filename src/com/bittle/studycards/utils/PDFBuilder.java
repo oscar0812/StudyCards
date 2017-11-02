@@ -43,6 +43,7 @@ public class PDFBuilder {
             StringBuilder question = new StringBuilder();
             StringBuilder answer = new StringBuilder();
             while ((line = bufferedReader.readLine()) != null) {
+                line = line+" ";
                 if (line.startsWith(questionStart)) {
                     if (isInAnswer) {
                         // read a question and answer already
