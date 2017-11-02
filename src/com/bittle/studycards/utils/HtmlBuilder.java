@@ -2,19 +2,20 @@ package com.bittle.studycards.utils;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
 
 class HtmlBuilder {
-    private final StringBuilder builder = new StringBuilder("<html>\n" + "<head></head>\n" + "<body>\n" + "<table>\n");
+    private Document mainHtml = Jsoup.parse("<html><head></head><body><table></table></body></html>");
     static final int MAX_PDF_HEIGHT_PX = 900;
 
-    private String newRow;
-    private String currentRow = "";
-    private final String close = "</table>\n" + "</body>\n" + "</html>\n";
-    private boolean isClosed = false;
-    private final String leftCard = "$(LEFT_CARD)$";
-    private final String rightCard = "$(RIGHT_CARD)$";
+    private Document newRow;
+    private int currentRow = 0;
+
+    // for calculating font size
+    private double boxHeight;
 
     HtmlBuilder(double boxHeight, boolean doCenter, double fontSize) {
+        this.boxHeight = boxHeight;
         // to put divs side by side with least space
         //double width = 49.43535;
         double width = 50;
@@ -23,51 +24,46 @@ class HtmlBuilder {
         String center2 = "display: table-cell; vertical-align: middle;";
         String font = "font-size: " + fontSize + "pt;";
 
-        newRow = "<tr>\n" +
+        String nr = "<tr>\n" +
                 "<div style=\"width: " + width + "%; height: " + boxHeight + "px; float:left;" + border +
-                (doCenter ? center1 : "") + font + "\"><div style=\"" + (doCenter ? center2 : "") + "\">" +
-                leftCard + "</div></div>\n" +
+                (doCenter ? center1 : "") + font + "\"><div class=\"left\" style=\"" + (doCenter ? center2 : "")
+                + "\"></div></div>\n" +
 
                 "<div style=\"width: " + width + "%; height: " + boxHeight + "px; float:right;" + border +
-                (doCenter ? center1 : "") + font + "\"><div style=\"" + (doCenter ? center2 : "") + "\">" +
-                rightCard + "</div></div></tr>\n";
+                (doCenter ? center1 : "") + font + "\"><div class=\"right\" style=\"" + (doCenter ? center2 : "")
+                + "\"></div></div></tr>\n";
+
+        newRow = Jsoup.parse(nr, "", Parser.xmlParser());
     }
 
     // append on the first column first, how questions are shown
     void appendLeftToRight(String entry) {
-        if (currentRow.isEmpty()) {
-            currentRow = newRow;
-            currentRow = currentRow.replace(leftCard, entry);
+        if (currentRow == 0) {
+            newRow.select(".left").first().text(entry);
+            currentRow++;
         } else {
-            currentRow = currentRow.replace(rightCard, entry);
-            builder.append(currentRow);
-            currentRow = "";
+            newRow.select(".right").first().text(entry);
+            mainHtml.select("body").first().append(newRow.html());
+            currentRow = 0;
         }
+
     }
 
     // append the second column first, how answers are shown (since pages are flipped this way when printed)
     void appendRightToLeft(String entry) {
-        if (currentRow.isEmpty()) {
-            currentRow = newRow;
-            currentRow = currentRow.replace(rightCard, entry);
+        if (currentRow == 0) {
+            newRow.select(".right").first().text(entry);
+            currentRow++;
         } else {
-            currentRow = currentRow.replace(leftCard, entry);
-            builder.append(currentRow);
-            currentRow = "";
+            newRow.select(".left").first().text(entry);
+            mainHtml.select("body").first().append(newRow.html());
+            currentRow = 0;
         }
     }
 
-    void close() {
-        builder.append(close);
-        isClosed = true;
-    }
-
-    boolean isClosed() {
-        return isClosed;
-    }
 
     String getHtml() {
-        return builder.toString();
+        return mainHtml.html();
     }
 
     String getXHtml() {
@@ -82,6 +78,6 @@ class HtmlBuilder {
 
     @Override
     public String toString() {
-        return builder.toString();
+        return mainHtml.toString();
     }
 }
