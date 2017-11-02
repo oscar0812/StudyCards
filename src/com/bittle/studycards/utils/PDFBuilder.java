@@ -17,7 +17,7 @@ public class PDFBuilder {
     private List<Card> cards;
     private int maxCardRows;
     private boolean centerText = false;
-    private double fontSize = 12;
+    private double fontSize = -1;
     private String outputDir = System.getProperty("user.home");
 
     public PDFBuilder(List<Card> cards) {
@@ -26,6 +26,53 @@ public class PDFBuilder {
         this.cards = cards;
         maxCardRows = 9;
     }
+
+    public PDFBuilder(File inputFile, String questionStart, String answerStart){
+        cards = getCardsFromFile(inputFile, questionStart, answerStart);
+    }
+
+    // constructor helper
+    private List<Card> getCardsFromFile(File inputFile, String questionStart, String answerStart) {
+        try {
+            List<Card> cards = new ArrayList<>();
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFile));
+            String line;
+            boolean isInQuestion = false;
+            boolean isInAnswer = false;
+
+            StringBuilder question = new StringBuilder();
+            StringBuilder answer = new StringBuilder();
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.startsWith(questionStart)) {
+                    if (isInAnswer) {
+                        // read a question and answer already
+                        cards.add(new Card(question.toString().substring(questionStart.length()).trim(),
+                                answer.toString().substring(answerStart.length()).trim()));
+                        question = new StringBuilder();
+                        answer = new StringBuilder();
+                    }
+                    isInQuestion = true;
+                    isInAnswer = false;
+                    question.append(line);
+
+                } else if (line.startsWith(answerStart)) {
+                    isInAnswer = true;
+                    isInQuestion = false;
+                    answer.append(line);
+                } else if(isInQuestion){
+                    question.append(line);
+                } else if(isInAnswer){
+                    answer.append(line);
+                }
+            }
+            return cards;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 
     // options for user
     public PDFBuilder maxCardRows(int num) {
@@ -54,10 +101,6 @@ public class PDFBuilder {
     public void create() {
         List<HtmlBuilder> pages = getPages();
 
-        if (!pages.isEmpty() && !pages.get(pages.size() - 1).isClosed()) {
-            pages.get(pages.size() - 1).close();
-        }
-
         List<File> files = new ArrayList<>();
         for (int x = 0; x < pages.size(); x++) {
             files.add(writeXHtmlToPDF(
@@ -81,8 +124,8 @@ public class PDFBuilder {
         for (int x = 0; x < cards.size(); x++) {
             // two cards per row, so * 2
             if (x > 0 && x % (maxCardRows * 2) == 0) {
-                pages.get(current).close();
-                pages.get(current + 1).close();
+                //pages.get(current).close();
+                //pages.get(current + 1).close();
                 current = current + 2;
 
                 // add by pairs, one page for questions, one for answers
